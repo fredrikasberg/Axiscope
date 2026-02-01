@@ -19,6 +19,15 @@ function isValidIP(input) {
     return urlRegex.test(input);
 }
 
+function buildCameraUrl(ip, streamUrl) {
+    // If the stream URL is already absolute (starts with http:// or https://), return it as-is
+    if (/^https?:\/\//i.test(streamUrl)) {
+        return streamUrl;
+    }
+    // Otherwise, prepend the printer IP
+    return printerUrl(ip, streamUrl);
+}
+
 function updatePage() {
   $.get(printerUrl(printerIp,"/printer/objects/query?gcode_move&toolhead&toolchanger&quad_gantry_level&stepper_enable"), function(data){
     // console.log(printerUrl)
@@ -303,7 +312,7 @@ $(document).ready(function() {
                                 $cameraList.empty();
                                 
                                 cams.forEach(function(cam) {
-                                    const streamUrl = printerUrl(ip, cam.stream_url);
+                                    const streamUrl = buildCameraUrl(ip, cam.stream_url);
                                     const snapshotUrl = streamUrl.replace('?action=stream', '?action=snapshot');
                                     
                                     const cameraOption = `
