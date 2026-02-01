@@ -21,9 +21,20 @@ function calculateZoomOrigin() {
     return { x: xPercent, y: yPercent };
 }
 
+function getActiveCameraElement() {
+    const webrtcFrame = document.getElementById('webrtc-frame');
+    if (webrtcFrame && webrtcFrame.style.display !== 'none') {
+        return webrtcFrame;
+    }
+    return document.getElementById('zoom-image');
+}
+
 // Function to update transform with all transformations
 function updateTransform() {
-    const zoomImage = document.getElementById('zoom-image');
+    const zoomImage = getActiveCameraElement();
+    if (!zoomImage) {
+        return;
+    }
     const zoomSlider = document.getElementById('zoom-range');
     const scale = 1 + (parseInt(zoomSlider.value) / 100);
     const scaleX = isFlippedHorizontal ? -scale : scale;
@@ -68,14 +79,4 @@ $(document).ready(function() {
 
     // Set initial transform
     updateTransform();
-        //Contrast
-        const img = document.getElementById('zoom-image');
-        const slider = document.getElementById('contrast-range');
-
-        function updateContrast() {
-            const value = slider.value;
-            img.style.filter = `contrast(${value}%)`;
-        }
-    slider.addEventListener('input', updateContrast);
-    updateContrast();
 });
