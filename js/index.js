@@ -28,6 +28,7 @@ function buildCameraUrl(ip, streamUrl) {
     return printerUrl(ip, streamUrl);
 }
 
+
 function updatePage() {
   $.get(printerUrl(printerIp,"/printer/objects/query?gcode_move&toolhead&toolchanger&quad_gantry_level&stepper_enable"), function(data){
     // console.log(printerUrl)
@@ -313,7 +314,17 @@ $(document).ready(function() {
                                 
                                 cams.forEach(function(cam) {
                                     const streamUrl = buildCameraUrl(ip, cam.stream_url);
-                                    const snapshotUrl = streamUrl.replace('?action=stream', '?action=snapshot');
+                                    // Check if this is a WebRTC or HTML stream (can't be previewed in img tag)
+                                    const isWebRtcOrHtml = streamUrl.includes('.html') || streamUrl.includes('webrtc') || streamUrl.includes('mode=webrtc');
+                                    
+                                    let previewContent;
+                                    if (isWebRtcOrHtml) {
+                                        // Show a camera icon placeholder for WebRTC/HTML streams
+                                        previewContent = `<div style="width: 160px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 4px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-camera-video" style="font-size: 2.5rem; color: rgba(255,255,255,0.5);"></i></div>`;
+                                    } else {
+                                        // Show the stream preview for MJPEG
+                                        previewContent = `<img src="${streamUrl}" class="camera-preview" alt="${cam.name}">`;
+                                    }
                                     
                                     const cameraOption = `
                                         <div class="camera-option p-2" 
@@ -323,12 +334,7 @@ $(document).ready(function() {
                                         >
                                             <div class="d-flex align-items-center">
                                                 <div class="me-3">
-                                                    <img src="${snapshotUrl}" 
-                                                         class="camera-preview"
-                                                         alt="${cam.name}"
-                                                         data-flip-h="${cam.flip_horizontal}"
-                                                         data-flip-v="${cam.flip_vertical}"
-                                                    >
+                                                    ${previewContent}
                                                 </div>
                                                 <div>
                                                     <h6 class="mb-0">${cam.name}</h6>
@@ -382,7 +388,12 @@ $(document).ready(function() {
         }
 
         const selectedIp = $('#printerIp').val();
-        const webcamPath = selectedUrl.split(selectedIp)[1];  // Extract the path part
+        
+        // Check if this is a WebRTC or HTML stream
+        const isWebRtcOrHtml = selectedUrl.includes('.html') || selectedUrl.includes('webrtc') || selectedUrl.includes('mode=webrtc');
+        
+        const isAbsoluteUrl = /^https?:\/\//i.test(selectedUrl);
+        const webcamPath = isAbsoluteUrl ? selectedUrl : selectedUrl.split(selectedIp)[1];  // Extract the path part
         
         // Update variables directly
         printerIp = selectedIp; // Update the global variable
@@ -393,10 +404,19 @@ $(document).ready(function() {
         
         // Update UI and set flip states
         const $zoomImage = $("#zoom-image");
-        $zoomImage
-            .attr("src", printerUrl(printerIp, WebcamPath))
-            .data('flip-h', flipHorizontal)
-            .data('flip-v', flipVertical);
+        const $webrtcFrame = $("#webrtc-frame");
+        if (isWebRtcOrHtml) {
+            $zoomImage.hide();
+            $webrtcFrame.attr("src", selectedUrl).show();
+        } else {
+            $webrtcFrame.hide().attr("src", "");
+            const imageUrl = isAbsoluteUrl ? WebcamPath : printerUrl(printerIp, WebcamPath);
+            $zoomImage
+                .attr("src", imageUrl)
+                .show()
+                .data('flip-h', flipHorizontal)
+                .data('flip-v', flipVertical);
+        }
             
         // Set initial flip states for buttons and apply transformations
         if (flipHorizontal) {

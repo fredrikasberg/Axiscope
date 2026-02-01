@@ -68,14 +68,14 @@ $(document).ready(function() {
 
     // Set initial transform
     updateTransform();
-    //Contrast
-    const img = document.getElementById('zoom-image');
-    const slider = document.getElementById('contrast-range');
+        //Contrast
+        const img = document.getElementById('zoom-image');
+        const slider = document.getElementById('contrast-range');
 
-    function updateContrast() {
-      const value = slider.value;
-      img.style.filter = `contrast(${value}%)`;
-    }
+        function updateContrast() {
+            const value = slider.value;
+            img.style.filter = `contrast(${value}%)`;
+        }
     slider.addEventListener('input', updateContrast);
     updateContrast();
 });

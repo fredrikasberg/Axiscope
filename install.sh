@@ -3,7 +3,7 @@
 # Default values
 AXISCOPE_ENV="axiscope-env"
 INSTALL_DIR="$HOME/axiscope"
-REPO_URL="https://github.com/nic335/Axiscope.git"
+REPO_URL="https://github.com/fredrikasberg/Axiscope.git"
 BRANCH="main"
 
 # Parse command line arguments
@@ -98,7 +98,7 @@ fi
 # Install Python dependencies
 echo "Installing Python dependencies..."
 pip install --upgrade pip
-pip install flask waitress  # Install Flask and Waitress WSGI server
+pip install flask waitress requests  # Install Flask, Waitress, and Requests
 
 # Create the service file
 echo "Creating service file..."
